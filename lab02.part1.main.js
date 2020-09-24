@@ -29,7 +29,6 @@ function getFirstIpAddress(cidrStr, callback) {
     limit: 1
   };
 
-  let combinedValue = null;
   // Use the object's isValid() method to verify the passed CIDR.
   if (!cidr.isValid()) {
     // If the passed CIDR is invalid, set an error message.
@@ -38,21 +37,12 @@ function getFirstIpAddress(cidrStr, callback) {
     // If the passed CIDR is valid, call the object's toArray() method.
     // Notice the destructering assignment syntax to get the value of the first array's element.
     [firstIpAddress] = cidr.toArray(options);
-    let ipv6 = null;
-    ipv6 = getIpv4MappedIpv6Address(firstIpAddress);
-    //console.log("In getFirstIpAddress ** 1 ** "+cidr);
-    //console.log("In getFirstIpAddress ** 2 ** "+firstIpAddress);
-    //console.log("In getFirstIpAddress ** 3 ** "+ipv6);
-    combinedValue = {
-        "ipv4" : firstIpAddress,
-        "ipv6" : ipv6
-    }
   }
   // Call the passed callback function.
   // Node.js convention is to pass error data as the first argument to a callback.
   // The IAP convention is to pass returned data as the first argument and error
   // data as the second argument to the callback function.
-  return callback(combinedValue, callbackError);
+  return callback(firstIpAddress, callbackError);
 }
 
 /**
@@ -61,7 +51,7 @@ function getFirstIpAddress(cidrStr, callback) {
  * @return {*} (ipv6Address) - An IPv6 address string or null if a run-time problem was detected.
  */
 function getIpv4MappedIpv6Address(ipv4) {
-  //console.log("In getUp4MappedIpv6Address ** 0 ** "+ipv4);  
+
   // Initialize return argument
   let ipv6Address = null;
 
@@ -73,7 +63,6 @@ function getIpv4MappedIpv6Address(ipv4) {
 
   // Verify IPv4 had four parts.
   if (numIpv4Segments === 4) {
-    //console.log("In getUp4MappedIpv6Address ** 1 ** has 4 getments");
     let validQuads = true;
     // Iterate over the IPv4 address parts and verify each segment was a number between 0 and 255.
     for(let i=0; i < numIpv4Segments; i++) {
@@ -83,7 +72,6 @@ function getIpv4MappedIpv6Address(ipv4) {
     }
     // Passed IPv4 is valid. Now to derive an IPv4-mapped IPv6 address.
     if (validQuads) {
-      //console.log("In getUp4MappedIpv6Address ** 2 ** has valid Quads");
       // Hardcode the prefix. During refactor, we might want to make the prefix a const.
       ipv6Address = "0:0:0:0:0:ffff:";
       // Iterate over the IPv4 parts
@@ -129,7 +117,7 @@ function main() {
       if (error) {
         console.error(`  Error returned from GET request: ${error}`);
       }
-      console.log(`  Response returned from GET request: ${JSON.stringify(data)}`);
+      console.log(`  Response returned from GET request: ${data}`);
     });
   }
   // Iterate over sampleIpv4s and pass the element's value to getIpv4MappedIpv6Address().
